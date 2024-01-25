@@ -1,0 +1,84 @@
+Platformer.cs
+ 
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Platform : MonoBehaviour
+{
+    //Скорость движения платформы
+    public float speed;
+    //Направление движения платформы
+    public Vector3 direction;
+    //Состояние платформы: активна / не активна
+    public bool isActive;
+   
+    //Обновление движения платформы каждый кадр
+    void Update()
+    {
+       
+        if (isActive)
+        {
+           
+            transform.position += direction * speed * Time.deltaTime;
+        }
+    }
+ 
+    //Столкновение платформы с двумя типами объектов
+    void OnTriggerEnter(Collider other) {
+        /*Если платформа достигает точки остановки, то она меняет направление
+        своего движения*/
+        if (other.tag == "PlatformStop")
+        {
+            direction *= -1;
+        }
+        //Если платформы коснулся игрок, то она активируется
+        if(other.tag == "Player")
+        {
+            isActive = true;
+        }
+    }
+   
+    void OnTriggerExit(Collider other) {
+        //Если с платформы ушёл игрок, то она дезактивируется
+        if (other.tag == "Player")
+        {
+        isActive = false;
+        }
+    }
+}
+
+Timer.cs
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class Timer : MonoBehaviour
+{
+    public int minutes;
+    public float seconds;
+    
+    // Цикл обновления составляет примерно 0.01 секунды
+    void Update()
+    {
+        seconds -= Time.deltaTime;
+        
+        if (seconds <= 0)
+        {
+            if (minutes > 0)
+            {
+                 seconds += 59;
+                 
+                 minutes--;
+            }
+            else
+            {
+                 // Если таймер остановился, перезагружаем текущую сцену
+                 int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+                 SceneManager.LoadScene(sceneIndex);
+            }
+        }
+    }
+}
