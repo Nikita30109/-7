@@ -1,0 +1,127 @@
+PlayerUI.cs
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class PlayerUI : MonoBehaviour
+{
+   public Player player;
+   public TextMeshProUGUI coinsCounterText;
+   public Slider healthSlider;
+   void Update()
+   {
+       // Обновляем текст с кол-вом монеток
+       coinsCounterText.text = player.coins.ToString();
+       
+       // Обновляем значение здоровья игрока
+       healthSlider.maxValue = player.maxHealth;
+       healthSlider.value = player.health; 
+   }
+}
+
+Player.cs
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class Player : MonoBehaviour
+{
+    //Текущее здоровье игрока
+    public int health = 10;
+    //Максимальное здоровье игрока
+    public int maxHealth = 10;
+   
+    //Число собранных монет
+    public int coins;
+   
+    //Префаб огненного шара и параметр Transform точки атаки
+    public GameObject fireballPrefab;
+    public Transform attackPoint;
+   
+    //Компонент, отвечающий за проигрывание звуков
+    public AudioSource audioSource;
+   
+    //Звуковой файл, содержащий звуковой эффект нанесения урона
+    public AudioClip damageSound;
+   
+    //Метод, обрабатывающий нанесённый урон
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+       
+        //Если здоровье ещё есть, то проигрывается звук нанесения урона
+        if(health > 0)
+        {
+            audioSource.PlayOneShot(damageSound);
+            //print("Здоровье игрока: " + health);
+        }
+        //Если здоровья нет, то перезапускается текущая сцена
+        else
+        {
+            int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+            SceneManager.LoadScene(sceneIndex);
+        }
+     }
+     
+    //Метод, увеличивающий число монеток
+    public void CollectCoins()
+     {
+        coins++;
+        //print("Собранные монетки: " + coins);
+     }
+    void Update()
+    {
+      
+       //Если игрок кликает левой кнопкой мыши, то создаётся огненный шар
+       if (Input.GetMouseButtonDown(0))
+    {
+        Instantiate(fireballPrefab, attackPoint.position, attackPoint.rotation);
+     }
+   }
+}
+
+Timer.cs
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+public class Timer : MonoBehaviour
+{
+    public int minutes;
+    public float seconds;
+    public TextMeshProUGUI timerText;
+   
+    // Цикл обновления составляет примерно 0.01 секунды
+    void Update()
+    {
+        seconds -= Time.deltaTime;
+       
+        if (seconds <= 0)
+        {
+            if (minutes > 0)
+            {
+                seconds += 59;
+               
+                minutes--;
+            }
+            else
+            {
+                // Если таймер остановился, перезагружаем текущую сцену
+                int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+                SceneManager.LoadScene(sceneIndex);
+            }
+        }
+       
+        //Округляем значение секунд до целых для их вывода на экран
+        int roundSeconds = Mathf.RoundToInt(seconds);
+        timerText.text = minutes + ":" + roundSeconds;
+    }
+}
